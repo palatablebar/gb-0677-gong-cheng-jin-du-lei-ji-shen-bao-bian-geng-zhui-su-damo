@@ -1,6 +1,7 @@
 from app.values import number
 from app.reasons import reject
 from app.errors import DomainError
+from app import reversals
 def evaluate(rows,context):
     good=[];bad=[];overrides=context.get("parameters",{}).get("previous_revisions",{});seen=set()
     for row in sorted(rows,key=lambda x:(x["item"],x["period"],x["claim_id"])):
@@ -12,4 +13,6 @@ def evaluate(rows,context):
         incremental=current-prev
         if incremental<0 and row.get("reversal")!="approved":bad.append(reject(row,"REVERSAL_REQUIRED","负进度缺少已批冲回凭证"));continue
         good.append({**row,"approved_previous":str(prev),"increment_qty":str(incremental),"gross_amount":str(incremental*number(row["unit_price"]))})
-    return {"rows":good,"quarantine":bad,"metrics":{"accepted":len(good),"negative_claims":sum(number(r["increment_qty"])<0 for r in good)}}
+    accepted,rejected,chain,metrics=reversals.build(good,context)
+    bad.extend(rejected)
+    return {"rows":accepted,"quarantine":bad,"metrics":{"accepted":len(accepted),"negative_claims":sum(number(r["increment_qty"])<0 for r in accepted),**metrics}}

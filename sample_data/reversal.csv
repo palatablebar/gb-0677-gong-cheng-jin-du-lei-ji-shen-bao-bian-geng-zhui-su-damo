@@ -1,0 +1,9 @@
+claim_id,item,period,cumulative_qty,previous_qty,change_id,reversal,reported,note,voucher_id,reversal_of
+R001,钢筋,2026-01,125,100,C0,none,2000.00,原申报,,
+R002,钢筋,2026-02,150,125,C0,none,2000.00,原申报,,
+R010,钢筋,2026-11,120,150,C0,approved,1700.00,超额冲回,RV-001,R002
+R011,钢筋,2026-12,100,120,C0,approved,1700.00,额度内冲回,RV-002,R001
+R012,钢筋,2027-01,90,100,C0,approved,1700.00,同凭证重试,RV-001,R002
+R013,钢筋,2027-02,80,90,C0,approved,-850.00,无原单,RV-003,ZZZ
+R014,002,2026-01,50,30,C0,none,2000.00,原申报,,
+R015,002,2026-12,55,50,C0,none,500.00,正常申报,,

@@ -7,4 +7,7 @@ def build_archive(run):
         writer.writerow([run["run_id"],meta["input_sha256"],meta["rule_version"],"accepted",json.dumps(row.get("_sources",[])),row.get("status",""),json.dumps(row,ensure_ascii=False)])
     for row in run["stages"][-1].get("cumulative_quarantine",[]):
         writer.writerow([run["run_id"],meta["input_sha256"],meta["rule_version"],"quarantine",json.dumps(row.get("_sources",[])),row.get("reason",""),json.dumps(row,ensure_ascii=False)])
+    chain=(run["stages"][3].get("metrics") or {}).get("reversal_chain") or [] if len(run["stages"])>3 else []
+    for entry in chain:
+        writer.writerow([run["run_id"],meta["input_sha256"],meta["rule_version"],"reversal_chain",json.dumps([entry.get("source_line")]),"",json.dumps(entry,ensure_ascii=False)])
     return "\ufeff"+stream.getvalue()

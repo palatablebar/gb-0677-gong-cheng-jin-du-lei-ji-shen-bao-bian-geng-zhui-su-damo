@@ -29,11 +29,15 @@
 | TRAP-06 | 全角累计量 | 转换失败 | Decimal归一 | `app/values.py` | `tests/test_m2.py::test_fullwidth_quantity` |
 | TRAP-07 | 累计量空值 | 按零冲回 | 隔离缺失 | `app/values.py` | `tests/test_m2.py::test_real_null_not_zero` |
 | TRAP-10 | 分币舍入 | 浮点误差 | 分项量化后净额守恒 | `app/modules/m5_deductions/rules.py` | `tests/test_m5.py::test_fraction_rounds_to_cent` |
+| TRAP-27 | 负进度整笔退回 | 已确认实施量继续挂账 | 按剩余额度部分采信并排出超额 | `app/reversals.py` | `tests/test_reversals.py::test_reversal_truncates_to_remaining_and_excludes_excess` |
+| TRAP-28 | 冲回无原单 | 先签后补来源 | 隔离 ORIGIN_NOT_FOUND，不进正式结果 | `app/reversals.py` | `tests/test_reversals.py::test_origin_not_found_is_isolated` |
+| TRAP-29 | 同凭证重试 | 同一原量被重复冲减 | 批次号与凭证唯一入册，重放置零 | `app/store.py` | `tests/test_reversals.py::test_publish_retry_does_not_double_deduct` |
+| TRAP-30 | 发布中断 | 台账与版本半写 | 单事务提交，失败回滚旧版旧账 | `app/store.py` | `tests/test_reversals.py::test_failed_publish_restores_old_version_and_ledger` |
 | TRAP-23 | 变更生效边界 | 旧价覆盖 | 按周期选择已批版本 | `app/modules/m3_changes/rules.py` | `tests/test_m3.py::test_effective_boundary` |
 
 ## 对账规则
 
-输入原始逻辑行=最终采纳来源行+隔离来源行+重复行+空白行+分段表头。派生记录用_sources保存完整来源，因此分组不丢行。业务预期合计与上游申报合计之差等于逐行差异之和。结果按输入摘要、规则版本及参数产生唯一批次，事务写入；同源重跑只复用已有批次。
+输入原始逻辑行=最终采纳来源行+隔离来源行+重复行+空白行+分段表头。派生记录用_sources保存完整来源，因此分组不丢行。冲回链按凭证逐笔记账：原申报、原已签量、已冲回量、采信量与剩余额度同时落盘，净进度=正向本期量−采信冲回量，可逐笔追到原申报且不超过剩余额度。业务预期合计与上游申报合计之差等于逐行差异之和。结果按输入摘要、规则版本及参数产生唯一批次，事务写入；同源重跑只复用已有批次。
 
 ## 已知不覆盖
 
